@@ -1,0 +1,50 @@
+############################
+# Maven / Java / Spring Boot
+############################
+target/
+*.class
+*.log
+*.DS_Store
+
+# Maven wrapper - KEEP these in Git
+!/.mvn/wrapper/maven-wrapper.jar
+!/.mvn/wrapper/maven-wrapper.properties
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+*.iws
+*.ipr
+
+############################
+# VS Code
+############################
+.vscode/
+
+############################
+# STS
+############################
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+############################
+# NetBeans (optional)
+############################
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+nb-gradle/
+build/
+
+############################
+# OS / misc
+############################
+Thumbs.db
