@@ -2,7 +2,9 @@ package com.project.contracter.dtos.contractTemplate;
 
 import java.time.Instant;
 
-// Returning template info
+import lombok.Data;
+
+@Data
 public class ContractTemplateDTO {
     private Long id;
     private String name;

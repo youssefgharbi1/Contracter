@@ -2,8 +2,9 @@ package com.project.contracter.dtos.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
-// For creating a user (signup)
+@Data
 public class UserCreateDTO {
     @NotBlank
     private String username;

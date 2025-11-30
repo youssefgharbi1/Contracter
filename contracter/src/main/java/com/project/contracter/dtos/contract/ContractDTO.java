@@ -4,7 +4,9 @@ import com.project.contracter.enums.ContractStatus;
 
 import java.time.Instant;
 
-// Returning contract info
+import lombok.Data;
+
+@Data
 public class ContractDTO {
     private Long id;
     private String title;

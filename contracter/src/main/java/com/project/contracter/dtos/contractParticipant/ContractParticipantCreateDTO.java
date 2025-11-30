@@ -1,6 +1,9 @@
 package com.project.contracter.dtos.contractParticipant;
 
-// Adding participant
+import com.project.contracter.enums.ParticipantRole;
+import lombok.Data;
+
+@Data
 public class ContractParticipantCreateDTO {
     private Long contractId;
     private Long userId;

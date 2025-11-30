@@ -2,7 +2,9 @@ package com.project.contracter.dtos.contractAttachment;
 
 import java.time.Instant;
 
-// Returning attachment info
+import lombok.Data;
+
+@Data
 public class ContractAttachmentDTO {
     private Long id;
     private Long contractId;

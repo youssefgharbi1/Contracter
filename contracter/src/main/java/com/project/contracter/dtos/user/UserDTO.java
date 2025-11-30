@@ -2,7 +2,9 @@ package com.project.contracter.dtos.user;
 
 import java.time.Instant;
 
-// For returning user info (public view)
+import lombok.Data;
+
+@Data
 public class UserDTO {
     private Long id;
     private String username;

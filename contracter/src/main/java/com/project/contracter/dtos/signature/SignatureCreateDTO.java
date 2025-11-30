@@ -1,6 +1,9 @@
 package com.project.contracter.dtos.signature;
 
-// Creating a signature
+import com.project.contracter.enums.SignatureType;
+import lombok.Data;
+
+@Data
 public class SignatureCreateDTO {
     private Long contractId;
     private Long userId; // optional if retrieved from auth context

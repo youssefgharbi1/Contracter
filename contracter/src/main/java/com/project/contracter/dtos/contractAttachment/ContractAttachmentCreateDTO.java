@@ -1,6 +1,8 @@
 package com.project.contracter.dtos.contractAttachment;
 
-// Uploading attachment
+import lombok.Data;
+
+@Data
 public class ContractAttachmentCreateDTO {
     private Long contractId;
     private String filename;

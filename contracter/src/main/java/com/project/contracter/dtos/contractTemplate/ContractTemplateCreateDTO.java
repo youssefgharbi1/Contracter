@@ -1,6 +1,9 @@
 package com.project.contracter.dtos.contractTemplate;
 
-// Creating template
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
 public class ContractTemplateCreateDTO {
     @NotBlank
     private String name;

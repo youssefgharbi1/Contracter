@@ -4,7 +4,9 @@ import com.project.contracter.enums.SignatureType;
 
 import java.time.Instant;
 
-// Returning signature info
+import lombok.Data;
+
+@Data
 public class SignatureDTO {
     private Long id;
     private Long contractId;

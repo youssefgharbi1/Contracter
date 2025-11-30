@@ -1,6 +1,10 @@
 package com.project.contracter.dtos.contractDraft;
 
-// Returning draft info
+import lombok.Data;
+
+import java.time.Instant;
+
+@Data
 public class ContractDraftDTO {
     private Long id;
     private Long contractId;

@@ -4,7 +4,9 @@ import com.project.contracter.enums.ParticipantRole;
 
 import java.time.Instant;
 
-// Returning participant info
+import lombok.Data;
+
+@Data
 public class ContractParticipantDTO {
     private Long id;
     private Long contractId;

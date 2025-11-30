@@ -1,6 +1,8 @@
 package com.project.contracter.dtos.contractDraft;
 
-// Creating a draft
+import lombok.Data;
+
+@Data
 public class ContractDraftCreateDTO {
     private Long contractId;
     private String content;
