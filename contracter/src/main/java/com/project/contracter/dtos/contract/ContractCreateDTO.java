@@ -8,6 +8,7 @@ import lombok.Data;
 public class ContractCreateDTO {
     @NotBlank
     private String title;
-
+    @NotBlank
+    private String creatorUsername;
     private String content; // optional for initial draft
 }

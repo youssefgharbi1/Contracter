@@ -10,4 +10,8 @@ public interface ContractDraftServiceI {
     ContractDraftDTO createDraft(ContractDraftCreateDTO dto, Long editorId) throws ResourceNotFoundException;
     List<ContractDraftDTO> listDraftsForContract(Long contractId) throws ResourceNotFoundException;
     ContractDraftDTO getDraft(Long draftId) throws ResourceNotFoundException;
+
+    ContractDraftDTO updateDraft(Long contractId, ContractDraftDTO dto);
+
+    void deleteDraft(Long contractId, Integer version);
 }

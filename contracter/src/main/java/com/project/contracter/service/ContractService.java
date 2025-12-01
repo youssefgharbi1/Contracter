@@ -32,8 +32,8 @@ public class ContractService implements ContractServiceI {
 
     @Override
     @Transactional
-    public ContractDTO createContract(ContractCreateDTO dto, Long creatorId) throws ResourceNotFoundException {
-        User creator = userRepository.findById(creatorId).orElseThrow(() -> new ResourceNotFoundException("Creator not found"));
+    public ContractDTO createContract(ContractCreateDTO dto) throws ResourceNotFoundException {
+        User creator = userRepository.findByUsername(dto.getCreatorUsername()).orElseThrow(() -> new ResourceNotFoundException("Creator not found"));
         Contract c = new Contract();
         c.setTitle(dto.getTitle());
         c.setContent(dto.getContent());
@@ -60,6 +60,12 @@ public class ContractService implements ContractServiceI {
         c.setUpdatedAt(Instant.now());
         Contract updated = contractRepository.save(c);
         return mapToDTO(updated);
+    }
+    @Override
+    @Transactional
+    public void deleteContract(Long id) throws ResourceNotFoundException {
+        Contract c = contractRepository.findById(contractId).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
+        contractRepository.delete(c);
     }
 
     @Override
@@ -98,6 +104,11 @@ public class ContractService implements ContractServiceI {
         List<Contract> list = contractRepository.findByCreatorId(creatorId);
         return list.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
+    @Override
+    public List<ContractDTO> listContractsByParticipant(Long participantId) {
+        List<Contract> list = contractRepository.findContractsByParticipantId(participantId);
+        return list.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
 
     private ContractDTO mapToDTO(Contract c) {
         ContractDTO dto = new ContractDTO();
@@ -110,5 +121,6 @@ public class ContractService implements ContractServiceI {
         dto.setPublishedAt(c.getPublishedAt());
         return dto;
     }
+
 }
 

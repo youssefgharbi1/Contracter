@@ -1,19 +1,6 @@
 package com.project.contracter.service;
 
 
-import com.project.contracter.dtos.contractAttachment.ContractAttachmentCreateDTO;
-import com.project.contracter.dtos.contractAttachment.ContractAttachmentDTO;
-import com.project.contracter.dtos.contractDraft.ContractDraftCreateDTO;
-import com.project.contracter.dtos.contractDraft.ContractDraftDTO;
-import com.project.contracter.dtos.contractParticipant.ContractParticipantCreateDTO;
-import com.project.contracter.dtos.contractParticipant.ContractParticipantDTO;
-import com.project.contracter.dtos.contractTemplate.ContractTemplateCreateDTO;
-import com.project.contracter.dtos.contractTemplate.ContractTemplateDTO;
-import com.project.contracter.dtos.signature.SignatureCreateDTO;
-import com.project.contracter.dtos.signature.SignatureDTO;
-import com.project.contracter.enums.ContractStatus;
-import com.project.contracter.enums.ParticipantRole;
-import com.project.contracter.exception.UnauthorizedException;
 import com.project.contracter.model.*;
 import com.project.contracter.repository.*;
 import com.project.contracter.service.serviceInterface.*;
@@ -22,24 +9,18 @@ import com.project.contracter.dtos.user.UserDTO;
 import com.project.contracter.exception.ConflictException;
 import com.project.contracter.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class UserService implements UserServiceI {
 
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     @Transactional
@@ -78,6 +59,46 @@ public class UserService implements UserServiceI {
     public Optional<User> findByUsernameOrEmail(String usernameOrEmail) {
         return userRepository.findByEmailOrUsername(usernameOrEmail, usernameOrEmail);
     }
+
+    @Override
+    public UserDTO findByEmail(String email) throws ResourceNotFoundException {
+        User u = userRepository.findByUsername(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return mapToDTO(u);
+    }
+
+    @Override
+    public UserDTO findByUsername(String username) throws ResourceNotFoundException {
+        User u = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return mapToDTO(u);
+    }
+    @Override
+    public UserDTO updateUser(Long id, UserCreateDTO request) {
+        // Find existing user
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
+
+        // Update fields
+        existingUser.setEmail(request.getEmail());
+        existingUser.setUsername(request.getUsername());
+        existingUser.setLastName(request.getLastName());
+        existingUser.setFirstName(request.getFirstName());
+
+        // Save updated user
+        User updatedUser = userRepository.save(existingUser);
+
+        // Map to DTO
+        return mapToDTO(updatedUser); // assuming you have a mapper or manual mapping
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + id));
+
+
+        userRepository.delete(existingUser);
+    }
+
 
     private UserDTO mapToDTO(User u) {
         UserDTO dto = new UserDTO();

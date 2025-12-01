@@ -32,5 +32,4 @@ public class ContractDraft {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
-    // Getters and setters...
 }

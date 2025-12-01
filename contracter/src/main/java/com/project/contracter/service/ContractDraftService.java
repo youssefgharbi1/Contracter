@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -54,6 +55,23 @@ public class ContractDraftService implements ContractDraftServiceI {
     public ContractDraftDTO getDraft(Long draftId) throws ResourceNotFoundException {
         ContractDraft d = draftRepository.findById(draftId).orElseThrow(() -> new ResourceNotFoundException("Draft not found"));
         return mapToDTO(d);
+    }
+
+    @Override
+    public ContractDraftDTO updateDraft(Long contractId, ContractDraftDTO dto) {
+        ContractDraft d = draftRepository.findById(dto.getId()).orElseThrow(() -> new ResourceNotFoundException("Draft not found"));
+        d.setContent(dto.getContent());
+        d.setVersion(dto.getVersion());
+        return mapToDTO(draftRepository.save(d));
+    }
+
+    @Override
+    public void deleteDraft(Long contractId, Integer version) {
+        ContractDraft d = draftRepository.findByContractId(contractId).stream()
+                .filter(dr -> Objects.equals(dr.getVersion(), version)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Draft not found"));
+        draftRepository.delete(d);
+
     }
 
     private ContractDraftDTO mapToDTO(ContractDraft d) {

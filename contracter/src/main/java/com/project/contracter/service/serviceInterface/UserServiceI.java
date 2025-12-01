@@ -15,5 +15,11 @@ public interface UserServiceI {
     UserDTO getById(Long id) throws ResourceNotFoundException;
     Optional<User> findEntityById(Long id);
     Optional<User> findByUsernameOrEmail(String usernameOrEmail);
+    UserDTO findByEmail(String email) throws ResourceNotFoundException;
+    UserDTO findByUsername(String username) throws ResourceNotFoundException;
+
+    UserDTO updateUser(Long id, UserCreateDTO userDTO);
+
+    void deleteUser(Long id);
 }
 
