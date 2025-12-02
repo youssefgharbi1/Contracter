@@ -23,7 +23,6 @@ public class ContractTemplateService implements ContractTemplateServiceI {
 
     private final ContractTemplateRepository templateRepository;
     private final UserRepository userRepository;
-    
 
     @Override
     @Transactional
@@ -44,9 +43,63 @@ public class ContractTemplateService implements ContractTemplateServiceI {
     }
 
     @Override
+    public ContractTemplateDTO getTemplateById(Long id) throws ResourceNotFoundException {
+        ContractTemplate template = templateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found with id: " + id));
+        return mapToDTO(template);
+    }
+
+    @Override
     public List<ContractTemplateDTO> listTemplatesByCreator(Long creatorId) {
         List<ContractTemplate> list = templateRepository.findByCreatorId(creatorId);
         return list.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ContractTemplateDTO> searchTemplates(String keyword) {
+        List<ContractTemplate> list = templateRepository.searchByNameOrDescription(keyword);
+        return list.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public ContractTemplateDTO updateTemplate(Long id, ContractTemplateCreateDTO dto) throws ResourceNotFoundException, ConflictException {
+        ContractTemplate template = templateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Template not found with id: " + id));
+
+        // Check if name is being changed and if new name already exists (excluding current template)
+        if (dto.getName() != null && !dto.getName().equals(template.getName())) {
+            if (templateRepository.existsByName(dto.getName())) {
+                throw new ConflictException("Template name already exists");
+            }
+            template.setName(dto.getName());
+        }
+
+        if (dto.getDescription() != null) {
+            template.setDescription(dto.getDescription());
+        }
+
+        if (dto.getContent() != null) {
+            template.setContent(dto.getContent());
+        }
+
+        template.setUpdatedAt(Instant.now());
+        ContractTemplate updated = templateRepository.save(template);
+        return mapToDTO(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTemplate(Long id) throws ResourceNotFoundException {
+        if (!templateRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Template not found with id: " + id);
+        }
+        templateRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return templateRepository.existsByName(name);
     }
 
     private ContractTemplateDTO mapToDTO(ContractTemplate t) {

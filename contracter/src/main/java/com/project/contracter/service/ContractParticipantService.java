@@ -32,7 +32,7 @@ public class ContractParticipantService implements ContractParticipantServiceI {
 
     @Override
     @Transactional
-    public ContractParticipantDTO addParticipant(ContractParticipantCreateDTO dto, Long actorId) throws ResourceNotFoundException, ConflictException {
+    public ContractParticipantDTO addParticipant(ContractParticipantDTO dto, Long actorId) throws ResourceNotFoundException, ConflictException {
         // Only contract creator can add participants (simple rule)
         Contract c = contractRepository.findById(dto.getContractId()).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
         if (!c.getCreator().getId().equals(actorId)) {
@@ -58,6 +58,19 @@ public class ContractParticipantService implements ContractParticipantServiceI {
         contractRepository.findById(contractId).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
         List<ContractParticipant> list = participantRepository.findByContractId(contractId);
         return list.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+    @Override
+    public List<ContractParticipantDTO> listSigners(Long contractId) throws ResourceNotFoundException {
+        contractRepository.findById(contractId).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
+        List<ContractParticipant> list = participantRepository.findByContractId(contractId);
+        return list.stream().filter(cp -> cp.getRole() == ParticipantRole.SIGNER ).map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public void removeParticipant(Long contractId, Long actorId) throws ResourceNotFoundException {
+        contractRepository.findById(contractId).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
+        ContractParticipant cp = participantRepository.findById(actorId).orElseThrow(() -> new ResourceNotFoundException("user"));
+        participantRepository.delete(cp);
     }
 
     @Override

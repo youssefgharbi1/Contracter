@@ -64,7 +64,7 @@ public class ContractService implements ContractServiceI {
     @Override
     @Transactional
     public void deleteContract(Long id) throws ResourceNotFoundException {
-        Contract c = contractRepository.findById(contractId).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
+        Contract c = contractRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
         contractRepository.delete(c);
     }
 
