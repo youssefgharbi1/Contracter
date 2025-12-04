@@ -29,10 +29,9 @@ public class ContractParticipant {
 
     private Boolean requiredToSign = true;
 
-    private Integer orderToSign;
+    private Boolean signed = false;
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
-    // Getters and setters...
 }

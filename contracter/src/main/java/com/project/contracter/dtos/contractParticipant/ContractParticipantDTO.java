@@ -13,7 +13,7 @@ public class ContractParticipantDTO {
     private Long userId;
     private ParticipantRole role;
     private Boolean requiredToSign;
-    private Integer orderToSign;
+    private Boolean signed;
     private Instant createdAt;
 }
 

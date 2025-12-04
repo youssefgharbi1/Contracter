@@ -20,8 +20,8 @@ public interface ContractParticipantRepository extends JpaRepository<ContractPar
 
     Optional<ContractParticipant> findByContractIdAndUserId(Long contractId, Long userId);
 
-    @Query("SELECT cp FROM ContractParticipant cp WHERE cp.contract.id = :contractId AND cp.requiredToSign = true ORDER BY cp.orderToSign")
-    List<ContractParticipant> findRequiredSignersByContractIdOrdered(@Param("contractId") Long contractId);
+    @Query("SELECT cp FROM ContractParticipant cp WHERE cp.contract.id = :contractId AND cp.requiredToSign = true")
+    List<ContractParticipant> findRequiredSignersByContractId(@Param("contractId") Long contractId);
 
     Boolean existsByContractIdAndUserId(Long contractId, Long userId);
 

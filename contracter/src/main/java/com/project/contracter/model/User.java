@@ -1,5 +1,6 @@
 package com.project.contracter.model;
 
+import com.project.contracter.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,10 @@ public class User {
     private String lastName;
     private String publicKey;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER; // Default role
+
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -43,4 +48,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<ContractParticipant> contractParticipants;
 
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = Instant.now();
+    }
 }

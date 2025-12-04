@@ -9,5 +9,4 @@ public class ContractParticipantCreateDTO {
     private Long userId;
     private ParticipantRole role;
     private Boolean requiredToSign;
-    private Integer orderToSign;
 }

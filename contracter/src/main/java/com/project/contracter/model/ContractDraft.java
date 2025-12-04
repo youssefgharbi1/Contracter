@@ -27,7 +27,7 @@ public class ContractDraft {
 
     @ManyToOne
     @JoinColumn(name = "editor_id")
-    private User editor;
+    private ContractParticipant editor;
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();

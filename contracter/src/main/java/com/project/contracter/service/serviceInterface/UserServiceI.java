@@ -8,6 +8,7 @@ import com.project.contracter.exception.ConflictException;
 import com.project.contracter.exception.ResourceNotFoundException;
 import com.project.contracter.model.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserServiceI {
@@ -15,6 +16,9 @@ public interface UserServiceI {
     UserDTO getById(Long id) throws ResourceNotFoundException;
     Optional<User> findEntityById(Long id);
     Optional<User> findByUsernameOrEmail(String usernameOrEmail);
+
+    List<UserDTO> searchUsernames(String username);
+
     UserDTO findByEmail(String email) throws ResourceNotFoundException;
     UserDTO findByUsername(String username) throws ResourceNotFoundException;
 

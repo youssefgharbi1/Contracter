@@ -11,12 +11,19 @@ import java.util.Optional;
 
 @Repository
 public interface ContractDraftRepository extends JpaRepository<ContractDraft, Long> {
-    List<ContractDraft> findByContractId(Long contractId);
 
     List<ContractDraft> findByContractIdOrderByVersionDesc(Long contractId);
 
+    List<ContractDraft> findByContractIdOrderByVersionAsc(Long contractId);
+
     Optional<ContractDraft> findByContractIdAndVersion(Long contractId, Integer version);
 
-    @Query("SELECT MAX(cd.version) FROM ContractDraft cd WHERE cd.contract.id = :contractId")
+    @Query("SELECT MAX(d.version) FROM ContractDraft d WHERE d.contract.id = :contractId")
     Optional<Integer> findLatestVersionByContractId(@Param("contractId") Long contractId);
+
+    long countByContractId(Long contractId);
+
+    Optional<ContractDraft> findFirstByContractIdOrderByVersionDesc(Long contractId);
+
+    boolean existsByContractIdAndVersion(Long contractId, Integer version);
 }

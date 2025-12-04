@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -58,6 +59,10 @@ public class UserService implements UserServiceI {
     @Override
     public Optional<User> findByUsernameOrEmail(String usernameOrEmail) {
         return userRepository.findByEmailOrUsername(usernameOrEmail, usernameOrEmail);
+    }
+    @Override
+    public List<UserDTO> searchUsernames(String username){
+        return userRepository.findByUsernameContainingIgnoreCase(username).stream().map(this::mapToDTO).toList();
     }
 
     @Override

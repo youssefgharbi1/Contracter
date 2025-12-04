@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,9 +39,9 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<UserDTO>> getUserByEmail(@RequestParam String value) {
-        UserDTO user = userService.findByEmail(value);
-        return ResponseEntity.ok(ApiResponse.<UserDTO>builder()
+    public ResponseEntity<ApiResponse<List<UserDTO>>> searchUserByUsername(@RequestParam String value) {
+        List<UserDTO> user = userService.searchUsernames(value);
+        return ResponseEntity.ok(ApiResponse.<List<UserDTO>>builder()
                 .success(true)
                 .message("User found successfully")
                 .data(user)

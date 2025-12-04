@@ -1,7 +1,9 @@
 package com.project.contracter.repository;
 
-import com.project.contracter.enums.ContractStatus;
 import com.project.contracter.model.Contract;
+import com.project.contracter.enums.ContractStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,16 +13,66 @@ import java.util.List;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
-    List<Contract> findByCreatorId(Long creatorId);
-    List<Contract> findByStatus(ContractStatus status);
-    List<Contract> findByCreatorIdAndStatus(Long creatorId, ContractStatus status);
 
-    @Query("SELECT c FROM Contract c JOIN c.participants cp WHERE cp.user.id = :userId")
-    List<Contract> findContractsByParticipantId(@Param("userId") Long userId);
+    // Find contracts by creator
+    @Query("SELECT c FROM Contract c WHERE c.creator.id = :creatorId")
+    List<Contract> findByCreatorId(@Param("creatorId") Long creatorId);
 
-    @Query("SELECT c FROM Contract c JOIN c.participants cp WHERE cp.user.id = :userId AND c.status = :status")
-    List<Contract> findContractsByParticipantIdAndStatus(@Param("userId") Long userId, @Param("status") ContractStatus status);
+    // Find contracts where user is a participant
+    @Query("SELECT DISTINCT c FROM Contract c " +
+            "JOIN c.participants cp " +
+            "WHERE cp.user.id = :participantId")
+    List<Contract> findContractsByParticipantId(@Param("participantId") Long participantId);
 
-    Long countByCreatorId(Long creatorId);
+    // Pagination and filtering methods
+    Page<Contract> findByStatus(ContractStatus status, Pageable pageable);
+
+    Page<Contract> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    Page<Contract> findByStatusAndTitleContainingIgnoreCase(
+            ContractStatus status, String title, Pageable pageable);
+
+    @Query("SELECT c FROM Contract c WHERE " +
+            "LOWER(c.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+            "LOWER(c.category) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<Contract> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrCategoryContainingIgnoreCase(
+            @Param("search") String search, Pageable pageable);
+
+    // Search methods (simplified - removed tag search)
+    @Query("SELECT c FROM Contract c WHERE c.creator.id = :userId AND " +
+            "(LOWER(c.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(c.category) LIKE LOWER(CONCAT('%', :query, '%')))")
+    List<Contract> searchByCreator(@Param("userId") Long userId, @Param("query") String query);
+
+    @Query("SELECT DISTINCT c FROM Contract c " +
+            "JOIN c.participants p " +
+            "WHERE p.user.id = :userId AND " +
+            "(LOWER(c.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(c.category) LIKE LOWER(CONCAT('%', :query, '%')))")
+    List<Contract> searchByParticipant(@Param("userId") Long userId, @Param("query") String query);
+
+    @Query("SELECT c FROM Contract c WHERE " +
+            "LOWER(c.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(c.category) LIKE LOWER(CONCAT('%', :query, '%')))")
+    List<Contract> searchAll(@Param("query") String query);
+
+    // Count methods for stats
+    @Query("SELECT COUNT(c) FROM Contract c WHERE c.creator.id = :creatorId AND c.status = :status")
+    long countByCreatorIdAndStatus(@Param("creatorId") Long creatorId,
+                                   @Param("status") ContractStatus status);
+
+    @Query("SELECT COUNT(DISTINCT c) FROM Contract c " +
+            "JOIN c.participants p " +
+            "WHERE p.user.id = :participantId")
+    long countContractsByParticipantId(@Param("participantId") Long participantId);
+
+    // Optional: Find by category
+    List<Contract> findByCategory(String category);
+
+    // Optional: Find by category with pagination
+    Page<Contract> findByCategory(String category, Pageable pageable);
 }
-
