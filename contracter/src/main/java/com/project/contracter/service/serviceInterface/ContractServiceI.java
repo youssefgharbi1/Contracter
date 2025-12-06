@@ -2,6 +2,7 @@ package com.project.contracter.service.serviceInterface;
 
 import com.project.contracter.dtos.contract.ContractCreateDTO;
 import com.project.contracter.dtos.contract.ContractDTO;
+import com.project.contracter.dtos.contract.ContractUpdateDTO;
 import com.project.contracter.exception.ResourceNotFoundException;
 import com.project.contracter.exception.UnauthorizedException;
 import com.project.contracter.exception.BadRequestException;
@@ -14,7 +15,7 @@ import java.util.List;
 public interface ContractServiceI {
 
     @Transactional
-    ContractDTO updateContract(Long contractId, ContractCreateDTO dto)
+    ContractDTO updateContract(Long contractId, ContractUpdateDTO dto)
             throws ResourceNotFoundException, BadRequestException;
 
     @Transactional

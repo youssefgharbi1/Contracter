@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class ContractDTO {
+
     private Long id;
     private String title;
     private String content;

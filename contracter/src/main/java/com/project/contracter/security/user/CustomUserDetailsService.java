@@ -23,7 +23,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return new CustomUserDetails(user); // Return custom UserDetails
+        return CustomUserDetails.builder()
+                .user(user)
+                .username(user.getUsername())
+                .password(user.getPasswordHash())
+                .authorities(getAuthorities(user))
+                .build();
     }
 
     private List<GrantedAuthority> getAuthorities(User user) {

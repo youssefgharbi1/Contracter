@@ -3,6 +3,7 @@ package com.project.contracter.service;
 import com.project.contracter.dtos.contract.ContractCreateDTO;
 import com.project.contracter.dtos.contract.ContractDTO;
 
+import com.project.contracter.dtos.contract.ContractUpdateDTO;
 import com.project.contracter.enums.ContractStatus;
 import com.project.contracter.exception.BadRequestException;
 import com.project.contracter.exception.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import com.project.contracter.repository.ContractDraftRepository;
 import com.project.contracter.repository.ContractRepository;
 import com.project.contracter.repository.UserRepository;
 import com.project.contracter.service.serviceInterface.ContractServiceI;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +44,6 @@ public class ContractService implements ContractServiceI {
         Contract contract = new Contract();
         contract.setTitle(dto.getTitle());
         contract.setDescription(dto.getDescription());
-        contract.setContent(dto.getContent());
         contract.setCategory(dto.getCategory());
         contract.setStatus(ContractStatus.DRAFT);
         contract.setCreator(creator);
@@ -63,7 +64,7 @@ public class ContractService implements ContractServiceI {
 
     @Transactional
     @Override
-    public ContractDTO updateContract(Long contractId, ContractCreateDTO dto)
+    public ContractDTO updateContract(Long contractId, ContractUpdateDTO dto)
             throws ResourceNotFoundException, BadRequestException {
 
         Contract contract = contractRepository.findById(contractId)
@@ -79,7 +80,6 @@ public class ContractService implements ContractServiceI {
         // Update fields
         contract.setTitle(dto.getTitle());
         contract.setDescription(dto.getDescription());
-        contract.setContent(dto.getContent());
         contract.setCategory(dto.getCategory());
         contract.setUpdatedAt(Instant.now());
 
@@ -268,21 +268,12 @@ public class ContractService implements ContractServiceI {
 
     @Override
     public List<ContractDTO> searchContracts(String query, String scope, Long userId) {
-        List<Contract> contracts;
-
-        switch (scope.toLowerCase()) {
-            case "my-contracts":
-                contracts = contractRepository.searchByCreator(userId, query);
-                break;
-            case "participating":
-                contracts = contractRepository.searchByParticipant(userId, query);
-                break;
-            case "all":
-                contracts = contractRepository.searchAll(query);
-                break;
-            default:
-                contracts = contractRepository.searchAll(query);
-        }
+        List<Contract> contracts = switch (scope.toLowerCase()) {
+            case "my-contracts" -> contractRepository.searchByCreator(userId, query);
+            case "participating" -> contractRepository.searchByParticipant(userId, query);
+            case "all" -> contractRepository.searchAll(query);
+            default -> null;
+        };
 
         return contracts.stream()
                 .map(this::mapToDTO)
@@ -315,8 +306,8 @@ public class ContractService implements ContractServiceI {
     // Helper methods
     private void validateStatusTransition(ContractStatus current, ContractStatus next) throws BadRequestException {
         // Add your business rules for status transitions here
-        // Example: Can't go from COMPLETED back to DRAFT
-        if (current == ContractStatus.COMPLETED && next == ContractStatus.DRAFT) {
+        // Example: Can't go from PUBLISHED back to DRAFT
+        if (current == ContractStatus.PUBLISHED && next == ContractStatus.DRAFT) {
             throw new BadRequestException("Cannot move completed contract back to draft");
         }
 
@@ -343,6 +334,7 @@ public class ContractService implements ContractServiceI {
     }
 
     // Inner class for stats
+    @AllArgsConstructor
     private static class ContractStats {
         private long draftCount;
         private long publishedCount;
@@ -351,18 +343,6 @@ public class ContractService implements ContractServiceI {
         private long archivedCount;
         private long participatingCount;
         private long totalCreatedCount;
-
-        public ContractStats(long draftCount, long publishedCount, long signedCount,
-                             long completedCount, long archivedCount, long participatingCount,
-                             long totalCreatedCount) {
-            this.draftCount = draftCount;
-            this.publishedCount = publishedCount;
-            this.signedCount = signedCount;
-            this.completedCount = completedCount;
-            this.archivedCount = archivedCount;
-            this.participatingCount = participatingCount;
-            this.totalCreatedCount = totalCreatedCount;
-        }
 
     }
 }

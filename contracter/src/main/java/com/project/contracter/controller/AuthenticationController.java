@@ -9,6 +9,7 @@ import com.project.contracter.security.user.CustomUserDetailsService;
 import com.project.contracter.security.user.UserRegistrationService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
+    @Lazy
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
@@ -63,48 +65,80 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<JwtAuthenticationResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
-        String username = jwtService.extractUsername(request.getRefreshToken());
+    public ResponseEntity<ApiResponse<JwtAuthenticationResponse>> refreshToken(
+            @RequestBody RefreshTokenRequest request) {
 
-        if (username != null) {
+        System.out.println("=== REFRESH DEBUG ===");
+        System.out.println("Full request object: " + request);
+        System.out.println("Refresh token received: " + (request.getRefreshToken() != null ?
+                request.getRefreshToken().substring(0, Math.min(50, request.getRefreshToken().length())) + "..." : "NULL"));
+        System.out.println("Token length: " + (request.getRefreshToken() != null ? request.getRefreshToken().length() : "null"));
+        if (request.getRefreshToken() == null || request.getRefreshToken().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<JwtAuthenticationResponse>builder()
+                            .success(false)
+                            .message("Refresh token is required")
+                            .build());
+        }
+
+        try {
+            String username = jwtService.extractUsername(request.getRefreshToken());
+
+            if (username == null) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.<JwtAuthenticationResponse>builder()
+                                .success(false)
+                                .message("Invalid refresh token format")
+                                .build());
+            }
+
             CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
 
-            if (jwtService.isTokenValid(request.getRefreshToken(), userDetails)) {
-                User user = userDetails.getUser();
-
-                var jwt = jwtService.generateToken(userDetails);
-                var newRefreshToken = jwtService.generateRefreshToken(userDetails);
-
-                JwtAuthenticationResponse response = JwtAuthenticationResponse.builder()
-                        .accessToken(jwt)
-                        .refreshToken(newRefreshToken)
-                        .expiresIn(jwtService.getJwtExpiration())
-                        .userInfo(JwtAuthenticationResponse.UserInfo.builder()
-                                .id(user.getId())
-                                .username(user.getUsername())
-                                .email(user.getEmail())
-                                .firstName(user.getFirstName())
-                                .lastName(user.getLastName())
-                                .role(user.getRole().name())
-                                .build())
-                        .build();
-
-                return ResponseEntity.ok(ApiResponse.<JwtAuthenticationResponse>builder()
-                        .success(true)
-                        .message("Token refreshed successfully")
-                        .data(response)
-                        .build());
+            if (!jwtService.isTokenValid(request.getRefreshToken(), userDetails)) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.<JwtAuthenticationResponse>builder()
+                                .success(false)
+                                .message("Invalid or expired refresh token")
+                                .build());
             }
+
+            User user = userDetails.getUser();
+
+            var newAccessToken = jwtService.generateToken(userDetails);
+            var newRefreshToken = jwtService.generateRefreshToken(userDetails);
+
+            JwtAuthenticationResponse response = JwtAuthenticationResponse.builder()
+                    .accessToken(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .expiresIn(jwtService.getJwtExpiration())
+                    .userInfo(JwtAuthenticationResponse.UserInfo.builder()
+                            .id(user.getId())
+                            .username(user.getUsername())
+                            .email(user.getEmail())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .role(user.getRole().name())
+                            .build())
+                    .build();
+
+            return ResponseEntity.ok(ApiResponse.<JwtAuthenticationResponse>builder()
+                    .success(true)
+                    .message("Token refreshed successfully")
+                    .data(response)
+                    .build());
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<JwtAuthenticationResponse>builder()
+                            .success(false)
+                            .message("Invalid refresh token")
+                            .build());
         }
-        return ResponseEntity.badRequest()
-                .body(ApiResponse.<JwtAuthenticationResponse>builder()
-                        .success(false)
-                        .message("Invalid refresh token")
-                        .build());
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> register(@RequestBody UserRegistrationService.UserRegistrationRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> register(
+            @RequestBody UserRegistrationService.UserRegistrationRequest request) {
         try {
             User user = userRegistrationService.registerUser(request);
 

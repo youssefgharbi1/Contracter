@@ -87,7 +87,7 @@ public class ContractController {
     @PreAuthorize("@contractSecurityService.canEditContract(#id)")
     public ResponseEntity<ApiResponse<ContractDTO>> updateContract(
             @PathVariable Long id,
-            @Valid @RequestBody ContractCreateDTO dto) {
+            @Valid @RequestBody ContractUpdateDTO dto) {
 
         ContractDTO updated = contractService.updateContract(id, dto);
 

@@ -57,7 +57,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     @Query("SELECT c FROM Contract c WHERE " +
             "LOWER(c.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(c.description) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(c.category) LIKE LOWER(CONCAT('%', :query, '%')))")
+            "LOWER(c.category) LIKE LOWER(CONCAT('%', :query, '%'))")
     List<Contract> searchAll(@Param("query") String query);
 
     // Count methods for stats
@@ -69,9 +69,6 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
             "JOIN c.participants p " +
             "WHERE p.user.id = :participantId")
     long countContractsByParticipantId(@Param("participantId") Long participantId);
-
-    // Optional: Find by category
-    List<Contract> findByCategory(String category);
 
     // Optional: Find by category with pagination
     Page<Contract> findByCategory(String category, Pageable pageable);

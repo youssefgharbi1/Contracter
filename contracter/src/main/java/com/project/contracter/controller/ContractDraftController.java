@@ -113,7 +113,6 @@ public class ContractDraftController {
     @DeleteMapping("/{draftId}")
     @PreAuthorize("@contractSecurityService.isContractCreator(#contractId)")
     public ResponseEntity<ApiResponse<Void>> deleteDraftById(
-            @PathVariable Long contractId,
             @PathVariable Long draftId) {
 
         draftService.deleteDraftById(draftId);
