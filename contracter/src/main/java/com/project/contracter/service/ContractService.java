@@ -5,13 +5,16 @@ import com.project.contracter.dtos.contract.ContractDTO;
 
 import com.project.contracter.dtos.contract.ContractUpdateDTO;
 import com.project.contracter.enums.ContractStatus;
+import com.project.contracter.enums.ParticipantRole;
 import com.project.contracter.exception.BadRequestException;
 import com.project.contracter.exception.ResourceNotFoundException;
 import com.project.contracter.exception.UnauthorizedException;
 import com.project.contracter.model.Contract;
 import com.project.contracter.model.ContractDraft;
+import com.project.contracter.model.ContractParticipant;
 import com.project.contracter.model.User;
 import com.project.contracter.repository.ContractDraftRepository;
+import com.project.contracter.repository.ContractParticipantRepository;
 import com.project.contracter.repository.ContractRepository;
 import com.project.contracter.repository.UserRepository;
 import com.project.contracter.service.serviceInterface.ContractServiceI;
@@ -34,6 +37,7 @@ public class ContractService implements ContractServiceI {
     private final ContractRepository contractRepository;
     private final UserRepository userRepository;
     private final ContractDraftRepository draftRepository;
+    private final ContractParticipantRepository participantRepository;
 
     @Transactional
     @Override
@@ -51,6 +55,14 @@ public class ContractService implements ContractServiceI {
         contract.setUpdatedAt(Instant.now());
 
         Contract saved = contractRepository.save(contract);
+        ContractParticipant participant = new ContractParticipant();
+        participant.setContract(contract);
+        participant.setRole(ParticipantRole.CREATOR);
+        participant.setUser(creator);
+        participant.setRequiredToSign(true);
+        participantRepository.save(participant);
+
+
         return mapToDTO(saved);
     }
 
@@ -140,9 +152,9 @@ public class ContractService implements ContractServiceI {
         contractRepository.delete(contract);
     }
 
-    @Override
     @Transactional
-    public ContractDTO publishContract(Long contractId, Long userId)
+    @Override
+    public ContractDTO publishContract(Long contractId, Long draftId, Long userId)
             throws ResourceNotFoundException, UnauthorizedException, BadRequestException {
 
         Contract contract = contractRepository.findById(contractId)
@@ -154,19 +166,13 @@ public class ContractService implements ContractServiceI {
         }
 
         // Check if already published
-        if (contract.getStatus() == ContractStatus.PUBLISHED) {
-            throw new BadRequestException("Contract already published");
+        if (contract.getStatus() != ContractStatus.DRAFT) {
+            throw new BadRequestException("Contract is not a draft to be published");
         }
 
-        // Optionally pick latest draft content if drafts exist
-        Optional<ContractDraft> latestDraft = draftRepository
-                .findByContractIdOrderByVersionDesc(contractId)
-                .stream()
-                .findFirst();
+        Optional<ContractDraft> draft = draftRepository.findById(draftId);
 
-        if (latestDraft.isPresent()) {
-            contract.setContent(latestDraft.get().getContent());
-        }
+        draft.ifPresent(contractDraft -> contract.setContent(contractDraft.getContent()));
 
         contract.setStatus(ContractStatus.PUBLISHED);
         contract.setPublishedAt(Instant.now());
@@ -229,6 +235,7 @@ public class ContractService implements ContractServiceI {
     }
 
     @Override
+    @Transactional
     public List<ContractDTO> listContractsByParticipant(Long userId) {
         List<Contract> contracts = contractRepository.findContractsByParticipantId(userId);
         return contracts.stream()

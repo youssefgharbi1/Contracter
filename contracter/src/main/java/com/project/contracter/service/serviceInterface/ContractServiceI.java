@@ -26,12 +26,15 @@ public interface ContractServiceI {
     void deleteContract(Long contractId, Long actorId)
             throws ResourceNotFoundException, UnauthorizedException, BadRequestException;
 
-    ContractDTO publishContract(Long contractId, Long userId) throws ResourceNotFoundException, UnauthorizedException, BadRequestException;
 
     @Transactional
     ContractDTO createContract(ContractCreateDTO dto, Long creatorId) throws ResourceNotFoundException;
 
     ContractDTO getContract(Long contractId) throws ResourceNotFoundException;
+
+    @Transactional
+    ContractDTO publishContract(Long contractId, Long draftId, Long userId)
+            throws ResourceNotFoundException, UnauthorizedException, BadRequestException;
 
     @Transactional
     ContractDTO archiveContract(Long contractId, Long userId)

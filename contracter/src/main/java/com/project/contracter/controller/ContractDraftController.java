@@ -24,7 +24,7 @@ public class ContractDraftController {
     private final UserProfileService userProfileService;
 
     @PostMapping
-    @PreAuthorize("@contractSecurityService.canEditContract(#contractId)")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ApiResponse<ContractDraftDTO>> createDraft(
             @PathVariable Long contractId,
             @Valid @RequestBody ContractDraftCreateDTO dto) {

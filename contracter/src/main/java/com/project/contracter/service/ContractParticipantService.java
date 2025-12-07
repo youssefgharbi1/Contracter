@@ -137,7 +137,7 @@ public class ContractParticipantService implements ContractParticipantServiceI {
     public boolean isUserContractEditor(Long contractId, Long userId) throws ResourceNotFoundException {
         ContractParticipant cEditor = participantRepository.findByContractIdAndUserId(contractId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
-        return cEditor.getRole().equals(ParticipantRole.EDITOR);
+        return cEditor.getRole().equals(ParticipantRole.EDITOR) ||  cEditor.getRole().equals(ParticipantRole.CREATOR);
 
         }
 

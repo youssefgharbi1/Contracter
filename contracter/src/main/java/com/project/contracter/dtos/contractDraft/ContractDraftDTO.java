@@ -13,7 +13,7 @@ public class ContractDraftDTO {
     private Long contractId;
     @NotBlank(message = "Content is required")
     private String content;
-    @NotBlank(message = "version is required")
+    @NotNull(message = "version is required")
     private Integer version;
     private Long editorId;
     private String editorUsername;

@@ -15,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,6 +44,7 @@ public class ContractController {
 
     @GetMapping("/{id}")
     @PreAuthorize("@contractSecurityService.canViewContract(#id)")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<ContractDTO>> getContract(@PathVariable Long id) {
         ContractDTO contract = contractService.getContract(id);
 
@@ -52,6 +54,7 @@ public class ContractController {
 
     @GetMapping("/my-contracts")
     @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<List<ContractDTO>>> getMyContracts() {
         User currentUser = userProfileService.getCurrentUser();
         List<ContractDTO> contracts = contractService.listContractsByCreator(currentUser.getId());
@@ -72,6 +75,7 @@ public class ContractController {
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<Page<ContractDTO>>> getAllContracts(
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(required = false) String status,
@@ -107,11 +111,11 @@ public class ContractController {
                 ApiResponse.success("Contract status updated successfully", updated));
     }
 
-    @PostMapping("/{id}/publish")
+    @PostMapping("/{id}/publish/{draftId}")
     @PreAuthorize("@contractSecurityService.isContractCreator(#id)")
-    public ResponseEntity<ApiResponse<ContractDTO>> publishContract(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<ContractDTO>> publishContract(@PathVariable Long id, @PathVariable Long draftId) {
         User currentUser = userProfileService.getCurrentUser();
-        ContractDTO published = contractService.publishContract(id, currentUser.getId());
+        ContractDTO published = contractService.publishContract(id, draftId ,currentUser.getId());
 
         return ResponseEntity.ok(
                 ApiResponse.success("Contract published successfully", published));
@@ -149,6 +153,7 @@ public class ContractController {
 
     @GetMapping("/{id}/history")
     @PreAuthorize("@contractSecurityService.canViewContract(#id)")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<List<ContractDTO>>> getContractHistory(@PathVariable Long id) {
         List<ContractDTO> history = contractService.getContractHistory(id);
 
@@ -158,7 +163,8 @@ public class ContractController {
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<ApiResponse<List<ContractDTO>>> searchContracts(
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<List<ContractDTO>>> searchMyContracts(
             @RequestParam String query,
             @RequestParam(required = false, defaultValue = "all") String scope) {
 
@@ -171,6 +177,7 @@ public class ContractController {
 
     @GetMapping("/stats")
     @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<Object>> getContractStats() {
         User currentUser = userProfileService.getCurrentUser();
         Object stats = contractService.getContractStats(currentUser.getId());

@@ -1,5 +1,7 @@
 package com.project.contracter.service;
 
+import com.project.contracter.enums.ContractStatus;
+import com.project.contracter.exception.ResourceNotFoundException;
 import com.project.contracter.model.Contract;
 import com.project.contracter.model.User;
 import com.project.contracter.repository.ContractParticipantRepository;
@@ -28,6 +30,8 @@ public class ContractSecurityService {
 
     public boolean canViewContract(Long contractId) {
         try {
+            Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
+            if (contract.getStatus() == ContractStatus.PUBLISHED) { return true;}
             User currentUser = userProfileService.getCurrentUser();
 
             // Check if user is contract creator

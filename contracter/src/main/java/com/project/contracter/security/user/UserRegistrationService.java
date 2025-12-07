@@ -2,6 +2,8 @@ package com.project.contracter.security.user;
 
 import com.project.contracter.model.User;
 import com.project.contracter.repository.UserRepository;
+import com.project.contracter.service.UserService;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -17,6 +19,7 @@ public class UserRegistrationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService userDetailsService;
 
     @Transactional
     public User registerUser(UserRegistrationRequest request) {
@@ -28,6 +31,8 @@ public class UserRegistrationService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered: " + request.getEmail());
         }
+        // Validate new password strength
+        userDetailsService.validatePasswordStrength(request.getPassword());
 
         User user = new User();
         user.setUsername(request.getUsername());
@@ -47,6 +52,7 @@ public class UserRegistrationService {
     public static class UserRegistrationRequest {
         // Getters and setters
         private String username;
+        @Email(message = "Please provide a valid email address")
         private String email;
         private String password;
         private String firstName;

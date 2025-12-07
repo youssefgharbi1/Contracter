@@ -9,7 +9,7 @@ public class UserCreateDTO {
     @NotBlank
     private String username;
 
-    @Email
+    @Email(message = "Please provide a valid email address")
     @NotBlank
     private String email;
 

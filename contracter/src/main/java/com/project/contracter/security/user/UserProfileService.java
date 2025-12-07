@@ -2,6 +2,7 @@ package com.project.contracter.security.user;
 
 import com.project.contracter.model.User;
 import com.project.contracter.repository.UserRepository;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class UserProfileService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService userDetailsService ;
 
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -65,41 +67,14 @@ public class UserProfileService {
             throw new RuntimeException("New password must be different from old password");
         }
 
-        // Validate new password strength (optional)
-        validatePasswordStrength(request.getNewPassword());
+        // Validate new password strength
+        userDetailsService.validatePasswordStrength(request.getNewPassword());
 
         // Encode and set new password
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         user.setUpdatedAt(java.time.Instant.now());
 
         userRepository.save(user);
-    }
-
-    // Optional: Password strength validation
-    private void validatePasswordStrength(String password) {
-        if (password == null || password.length() < 8) {
-            throw new RuntimeException("Password must be at least 8 characters long");
-        }
-
-        // Check for at least one uppercase letter
-        if (!password.matches(".*[A-Z].*")) {
-            throw new RuntimeException("Password must contain at least one uppercase letter");
-        }
-
-        // Check for at least one lowercase letter
-        if (!password.matches(".*[a-z].*")) {
-            throw new RuntimeException("Password must contain at least one lowercase letter");
-        }
-
-        // Check for at least one digit
-        if (!password.matches(".*\\d.*")) {
-            throw new RuntimeException("Password must contain at least one digit");
-        }
-
-        // Check for at least one special character
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            throw new RuntimeException("Password must contain at least one special character");
-        }
     }
 
 
@@ -126,6 +101,8 @@ public class UserProfileService {
         private String firstName;
         private String lastName;
         private String publicKey;
+        @Email(message = "Please provide a valid email address")
+        private String email;
 
 
     }
